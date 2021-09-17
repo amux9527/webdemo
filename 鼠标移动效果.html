@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鼠标移动特效</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas></canvas>
+    <script>
+        const can = document.querySelector('canvas')
+        can.width = window.innerWidth
+        can.height = window.innerHeight
+        const ctx = can.getContext('2d')
+
+        // 存放球的数组
+        const circleArr = []
+
+        // 球类
+        class Circle {
+            constructor(x, y, r) {
+                this.x = x
+                this.y = y
+                this.r = r
+                this.color = `rgb(${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)},${Math.round(Math.random() * 255)})`
+                // 随机偏移方向
+                this.px = Math.random() * 15 - 7
+                this.py = Math.random() * 15 - 7
+                // 往数组中添加自己
+                circleArr.push(this)
+            }
+
+            // 渲染方法
+            render() {
+                ctx.beginPath()
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, true)
+                ctx.fillStyle = this.color
+                ctx.closePath()
+                ctx.fill()
+            }
+
+            // 更新方法
+            update() {
+                this.x += this.px
+                this.y += this.py
+                this.r--
+                if (this.r < 0) {
+                    circleArr.forEach((item, index) => {
+                        if (item === this) {
+                            circleArr.splice(index, 1)
+                        }
+                    })
+                    return false
+                }
+                return true
+            }
+
+        }
+
+        let lock = true
+
+        // 监听鼠标移动事件,创建圆球实例
+        can.onmousemove = e => {
+
+            if (!lock) return
+
+            new Circle(e.clientX, e.clientY, 20)
+            lock = false
+            setTimeout(() => {
+                lock = true
+            }, 15)
+
+        }
+
+        setInterval(() => {
+            ctx.clearRect(0, 0, can.width, can.height)
+            circleArr.forEach(item => {
+                item.update() && item.render()
+            })
+        }, 20)
+
+
+    </script>
+</body>
+
+</html>
